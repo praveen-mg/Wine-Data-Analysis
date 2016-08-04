@@ -14,20 +14,20 @@ knitr::opts_chunk$set(echo = TRUE)
 In this rmd file we will do detailed analysis on different chemical composition of 
 white wine and its effect on quality
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 library(ggplot2)
 library("GGally")
 ```
-```{r echo = FALSE}
+```{r echo = FALSE, warning=FALSE}
 wine <- read.csv('wineQualityWhites.csv',header = TRUE)
 dim(wine)
 ```
 ## Summary information on different variables 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 
 summary(wine)
 ```
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 
 str(wine)
 ```
@@ -35,7 +35,7 @@ str(wine)
 ## Univariant Data Analysis 
 
 #### Histogram Analysis
-```{r echo=FALSE, Plot_One}
+```{r echo=FALSE, warning=FALSE}
 ggplot(aes(x = quality),data = wine)+
   geom_histogram(binwidth = .5)+
   scale_x_continuous(limits = c(0, 10), breaks =  seq(0, 10, 1))
@@ -43,13 +43,13 @@ ggplot(aes(x = quality),data = wine)+
 
 
 
-#summary(wine$fixed.acidity) names(wine)
+table(wine$quality) 
 
 
 
 ```
 
-```{r echo = FALSE}
+```{r echo = FALSE, warning=FALSE}
 ggplot(aes(x = fixed.acidity),data = wine)+
   geom_histogram()
 
@@ -70,15 +70,48 @@ ggplot(aes(x = citric.acid),data = wine)+
 
 ggplot(aes(x = chlorides), data = wine)+
   geom_histogram()
+  
 
 ggplot(aes(x = chlorides), data = wine)+
   geom_histogram(binwidth = 0.001)
 
-ggplot(aes(x = chlorides), data = wine)+
+
+ggplot(aes(x = pH), data = wine)+
   geom_histogram()
 
-ggplot(aes(x = chlorides), data = wine)+
-  geom_histogram(binwidth = .001)
+ggplot(aes(x = pH), data = wine)+
+  geom_histogram(binwidth = 0.01)
+
+ggplot(aes(x = sulphates), data = wine)+
+  geom_histogram()
+
+ggplot(aes(x = sulphates), data = wine)+
+  geom_histogram(binwidth = 0.01)
+
+ggplot(aes(x = density), data = wine)+
+  geom_histogram()
+
+
+ggplot(aes(x = density), data = wine)+
+  geom_histogram(binwidth = 0.0005)
+
+```
+
+```{r echo = FALSE, warning=FALSE}
+
+
+
+ggplot(aes(x = residual.sugar), data = wine)+
+  geom_histogram()
+
+ggplot(aes(x = residual.sugar), data = wine)+
+  geom_histogram(binwidth = .05)+
+  scale_x_log10()
+
+```
+The residual sugar has bimodal distribution, may be wine with two sugar values may be of much interest.
+
+```{r echo = FALSE, warning=FALSE}
 
 ggplot(aes(x = free.sulfur.dioxide), data = wine)+
   geom_histogram()
@@ -86,43 +119,22 @@ ggplot(aes(x = free.sulfur.dioxide), data = wine)+
 ggplot(aes(x = free.sulfur.dioxide), data = wine)+
   geom_histogram(binwidth = 2)
 
-
-ggplot(aes(x = pH), data = wine)+
-  geom_histogram()
-ggplot(aes(x = pH), data = wine)+
-  geom_histogram(binwidth = 0.01)
-
-ggplot(aes(x = sulphates), data = wine)+
+ggplot(aes(x = total.sulfur.dioxide), data = wine)+
   geom_histogram()
 
-ggplot(aes(x = sulphates), data = wine)+
-  geom_histogram(binwidth = 0.01)
+ggplot(aes(x = total.sulfur.dioxide), data = wine)+
+  geom_histogram(binwidth = 2)
+
 
 
 ```
-
-```{r echo = FALSE}
-
+Feature free sulfur dioxise and total sulfur dioxide has outliers. For free sulfur dioxide the value of median 34, 3rd quadrant is 46 but max value is 289. Similarly for total sulfur dioxide median is 134, 3rd quadrant is 167 but max value is 440. 
 
 
-ggplot(aes(x = residual.sugar), data = wine)+
-  geom_histogram()
 
-ggplot(aes(x = residual.sugar), data = wine)+
-  geom_histogram(binwidth = .1)
 
-```
 
-```{r echo = FALSE}
-ggplot(aes(x = density), data = wine)+
-  geom_histogram()
-
-ggplot(aes(x = density), data = wine)+
-  geom_histogram(binwidth = 0.0005)
-
-```
-
-```{r echo = FALSE}
+```{r echo = FALSE, warning=FALSE}
 #names(wine)
 #summary(wine$alcohol)
 
@@ -130,19 +142,61 @@ ggplot(aes(x = alcohol), data = wine)+
   geom_histogram()
 
 ggplot(aes(x = alcohol), data = wine)+
-  geom_histogram(binwidth = 0.05)
+  geom_histogram(binwidth = 0.005)
 
 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 
 ggplot(aes(x = X),data = wine)+
-  geom_histogram()+
-  scale_x_continuous()
+  geom_histogram( binwidth = .1)+
+  scale_x_log10()
+summary(wine$X)
 
 ```
 
+####What is structure of Data Set ?
+
+The data set has 4898 wines with 13 features (X, fixed.acidity, volatile.acidity,
+citric.acid, residual sugar, chlorides, free sulfur dioxide, total sulfur dioxide,
+  density, ph, sulphates, alcohol, quality). Follwing are observations made about the data 
+  * Most of the wine in this data falls in the quality score of 5,6,7.
+  * There is no wine in the data set with with quality less than score of 3 or score of 10.
+  * Feature alcohol is uniformly distributed.
+  * Feature X is negatively skewed.
+  * Other features (fixed.acidity, volatile.acidity,
+citric.acid, residual sugar, chlorides, free sulfur dioxide, total sulfur dioxide,
+  density, ph, sulphates, alcohol, quality) are normally distributed.
+  
+####What are the main features of interest?
+
+The quality is the main feature of interest, I will find out how other features will influence quality. I stringly suspect residual sugar has some relation ship with the quality of the wine.Logically it makes sense for alcohol content to have some relationship with wine quality. From this univariant analysis it very difficult to esablish any relationship between quality and other features.
+
+####What are the unusual patterns did u saw in your univariant data analysis? Did you make any adjustment to the data tidy or transform the shpae of the data? If so, why did you do this?
+
+The feature X has unusal shape with histogram with default values, so I applied log transform to the data to obtain right skewed distribution. With most values falling around the value 2500.Residual sugar value is transformed from left skwed to bimodal distribution most of the wine falling around 3 or 9. The bin values is adjusted in all the histogrmas.
+  
+  
+  
+
+```{r echo=FALSE, warning=FALSE}
+#grouping wine into quality of low, medium and high based on quality value
+
+wine$qualityLabel <- ifelse(wine$quality < 4, 'low',ifelse(wine$quality < 6,'medium','high'))
+
+
+```
+
+
+#### Boxplot Analysis
+```{r echo=FALSE, warning=FALSE}
+
+
+
+summary(wine$alcohol)
+
+```
 
 
 
