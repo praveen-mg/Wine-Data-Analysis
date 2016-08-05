@@ -180,21 +180,101 @@ The feature X has unusal shape with histogram with default values, so I applied 
   
   
 
-```{r echo=FALSE, warning=FALSE}
-#grouping wine into quality of low, medium and high based on quality value
 
-wine$qualityLabel <- ifelse(wine$quality < 4, 'low',ifelse(wine$quality < 6,'medium','high'))
+## Bivariant Data Analysis 
+
+#### Scatterplot Analysis
+```{r echo=FALSE}
+#Create bivariant analysis on all the features using ggpairs
+set.seed(1836)
+wine_sample <- wine[sample.int(nrow(wine),1000),]
+head(wine_sample)
+ggpairs(wine_sample)
+
+```
+```{r echo=FALSE}
+ggplot(aes(x = alcohol, y = quality),data = wine)+
+  geom_point()
+
+cor.test(wine$alcohol,wine$quality)
+
+```
+
+Correlation between alcohol and quality is low at 0.4355, we could not see any relationship in scatterplot as well. Infact correlation between quality and other features are quiet low and I could not see any relationship in scatterplot as well.
+
+```{r echo=FALSE}
+#creating Scatterplot for density,alcohol and residual sugar and density.
+#Also find the pearson r for the variables.
+ggplot(aes(x = alcohol, y = density),data = wine)+
+  geom_point()+
+  geom_smooth(method = 'lm',color = 'red')
+
+cor.test(wine$alcohol,wine$density)
+
+ggplot(aes(x = residual.sugar, y = density),data = wine)+
+  geom_point()+
+  xlim(0,quantile(wine$residual.sugar,.95))+
+  geom_smooth(method = 'lm',color = 'red')
+
+cor.test(wine$residual.sugar,wine$density)
 
 
 ```
 
+The density and alcohol has some negative correlation, with correlation coefficient of -0.78. The residual sugar and density has positive correlation with correlation value of 0.839
+
+```{r echo=FALSE, warning=FALSE}
+#grouping wine into quality of low, medium and high based on quality value
+
+wine$qualityLabel <- ifelse(wine$quality < 5, 'low',ifelse(wine$quality < 7,'medium','high'))
+
+wine$qualityLabel <- ifelse(wine$quality < 6, 'low','high')
+table(wine$quality)
+table(wine$qualityLabel)
+
+```
+It is very difficult to establish any relationship between quality and other features in the dataset. This dataset doesnot have any ordered feature, I created one using quality. The quality is divied into three ordered variable namely low, medium and high. The wine quality score less than 4 are categorized as low, score 5 and 6 are categorized as medium and scores above 6 are categorized as high. 
+
+Based on this categorical quality data we do the boxplot analysis on different variables in this dataset.
 
 #### Boxplot Analysis
 ```{r echo=FALSE, warning=FALSE}
 
+is.factor(wine$qualityLabel)
+
+wine$qualityLabel <- factor(wine$qualityLabel)
 
 
-summary(wine$alcohol)
+ggplot(aes(x = qualityLabel, y = alcohol),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityLabel, y = fixed.acidity),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityLabel, y = volatile.acidity),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityLabel, y = citric.acid),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityLabel, y = residual.sugar),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityLabel, y = chlorides),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityLabel, y = free.sulfur.dioxide),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityLabel, y = total.sulfur.dioxide),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityLabel, y = density),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityLabel, y = pH),data = wine)+
+  geom_boxplot()
+
 
 ```
 
