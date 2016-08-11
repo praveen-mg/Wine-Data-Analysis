@@ -17,6 +17,7 @@ white wine and its effect on quality
 ```{r echo=FALSE, warning=FALSE}
 library(ggplot2)
 library("GGally")
+library(polycor)
 ```
 ```{r echo = FALSE, warning=FALSE}
 wine <- read.csv('wineQualityWhites.csv',header = TRUE)
@@ -192,24 +193,49 @@ head(wine_sample)
 ggpairs(wine_sample)
 
 ```
+
+```{r echo = FALSE}
+
+hetcor(wine)
+
+```
+
+The pearson R between quality and features are quiet low. The alcohol and quality has highest pearson R at 0.4356. Other features that might influence quality are fixed.acidity, volatile.acidity, residual.sugar,chlorides, total.sulfur.dioxide, density and sulphates.
+
+
 ```{r echo=FALSE}
 ggplot(aes(x = alcohol, y = quality),data = wine)+
-  geom_point()
+  geom_jitter()
+
+ggplot(aes(x = alcohol, y = quality),data = wine)+
+  geom_point(alpha = 1/2, position = position_jitter(h=0))
 
 cor.test(wine$alcohol,wine$quality)
 
 ```
+From the scatterlot between alcohol and quality we can see alcohol quality at 5,6,7 have range of alcohol content from 7 percent to 13 percent. The lower quality wine of 5 and below have alcohol content predominently in the range of 7 and 11. 
 
-Correlation between alcohol and quality is low at 0.4355, we could not see any relationship in scatterplot as well. Infact correlation between quality and other features are quiet low and I could not see any relationship in scatterplot as well.
+
+
+
+
+```{r echo = FALSE}
+ggplot(aes(x = alcohol, y = density),data = wine)+
+  geom_jitter()
+ggplot(aes(x = alcohol, y = density),data = wine)+
+  geom_point(alpha = 1/2,position = position_jitter(h=0))+
+  geom_smooth(method = 'lm',color = 'red')
+
+cor.test(wine$alcohol,wine$density)
+
+```
+Density and alcohol seems to have negative correlation with pearson R value of -0.7801. Wine with higher alcohol content have lowe density. 
+
 
 ```{r echo=FALSE}
 #creating Scatterplot for density,alcohol and residual sugar and density.
 #Also find the pearson r for the variables.
-ggplot(aes(x = alcohol, y = density),data = wine)+
-  geom_point()+
-  geom_smooth(method = 'lm',color = 'red')
 
-cor.test(wine$alcohol,wine$density)
 
 ggplot(aes(x = residual.sugar, y = density),data = wine)+
   geom_point()+
@@ -221,7 +247,96 @@ cor.test(wine$residual.sugar,wine$density)
 
 ```
 
-The density and alcohol has some negative correlation, with correlation coefficient of -0.78. The residual sugar and density has positive correlation with correlation value of 0.839
+ The residual sugar and density has positive correlation with correlation value of 0.839
+
+```{r echo = FALSE}
+ggplot(aes(x = density, y = quality),data = wine)+
+  geom_jitter()
+
+ggplot(aes(x = density, y = quality),data =  subset(wine,density <= quantile(density,0.99)))+
+  geom_point(alpha = 1/2, position = position_jitter(h=0))
+
+```
+As expected the density and quality is opposite of alcohol and quality distribution. For instace lower wine quality have predominatly higher quality. 
+
+
+```{r echo= FALSE}
+
+ggplot(aes(x = fixed.acidity, y = quality),data = wine)+
+  geom_jitter()
+
+ggplot(aes(x = fixed.acidity, y = quality),data = wine)+
+  geom_point(alpha = 1/3, position = position_jitter(h=0))
+
+
+ggplot(aes(x = volatile.acidity, y = quality),data = wine)+
+  geom_jitter()
+
+ggplot(aes(x = volatile.acidity, y = quality),data =  subset(wine,volatile.acidity <= quantile(volatile.acidity,0.95)))+
+  geom_point(alpha = 1/2, position = position_jitter(h=0))
+
+```
+
+It is difficult to establish any relationship between fixed.acidity and quality. The volatile acidity has lot of outliers, even after removing outliers any relationship between quality and fixed acidity. All the quality values has similar distribution of volatile acidity.
+
+
+```{r echo = FALSE}
+
+
+
+ggplot(aes(x = residual.sugar, y = quality), data = wine)+
+  geom_jitter()
+
+ggplot(aes(x = residual.sugar, y = quality),data =  subset(wine,residual.sugar <= quantile(residual.sugar,0.99)))+
+  geom_point(alpha = 1/2, position = position_jitter(h=0))
+
+```
+The residual sugar has lot of outliers,so only top 99 percentlie is taken into analysis.From the scatter plot we can infer that wine quality which is 4 or below has predominetly lower residual sugar. Wine quality of 5 and above have similar distribution of residual sugar. This is suprise as I was expecting distribution similar to density and quality, but it was similar to alcohol and quality.  
+
+```{r echo = FALSE}
+
+
+ggplot(aes(x = chlorides, y = quality), data = wine)+
+  geom_jitter()
+
+ggplot(aes(x = chlorides, y = quality),data =  subset(wine,chlorides <= quantile(chlorides,0.99)))+
+  geom_point(alpha = 1/2, position = position_jitter(h=0))
+  
+
+```
+The chlorides has some outliers so only top 99 percentile is considered. The middle wine quality has range of chlorides on the other hand lower and higher wine quality has lowe chloride values. This may be because middle wine quality has more sample and hence the variance is quiet high.
+
+```{r ech = FALSE}
+
+
+ggplot(aes(x = total.sulfur.dioxide, y = quality), data = wine)+
+  geom_jitter()
+
+ggplot(aes(x = total.sulfur.dioxide, y = quality),data = wine)+ 
+  geom_point(alpha = 1/2, position = position_jitter(h=0))
+
+```
+
+
+
+```{r echo = FALSE}
+
+
+ggplot(aes(x = sulphates, y = quality), data = wine)+
+  geom_jitter()
+
+ggplot(aes(x = sulphates, y = quality),data = wine)+ 
+  geom_point(alpha = 1/2, position = position_jitter(h=0))
+
+
+```
+
+Differnt wine quality of wine has similar distribution of sulphates.
+
+
+
+
+
 
 ```{r echo=FALSE, warning=FALSE}
 #grouping wine into quality of low, medium and high based on quality value
@@ -275,13 +390,88 @@ ggplot(aes(x = qualityLabel, y = density),data = wine)+
 ggplot(aes(x = qualityLabel, y = pH),data = wine)+
   geom_boxplot()
 
+wine$qualityordered <- factor(wine$quality)
+
+ggplot(aes(x= qualityordered, y = alcohol), data = wine)+
+geom_boxplot()
+
+ggplot(aes(x = qualityordered, y = pH),data = wine)+
+  geom_boxplot()
 
 ```
 
+```{r echo = FALSE}
+
+wine$quality <- factor(wine$quality)
+
+table(wine$quality)
+
+```
+
+To do box plot analysis quality is converted to factor variable.
+
+```{r echo = FALSE}
+
+
+
+ggplot(aes(x = quality, y = alcohol),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = quality, y = density),data = wine)+
+  geom_boxplot()
+
+
+
+```
+The wine quality of 6 and above have higher median alcohol value and median alcohol value have increasing trend from alcohol quality 6 and above. As expected we can see exact opposite trend with density.
+
+
+```{r echo = FALSE}
+
+# residual.sugar,chlorides, #total.sulfur.dioxide, density and sulphates
+
+ggplot(aes(x = quality, y = fixed.acidity),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = quality, y = volatile.acidity),data = subset(wine,volatile.acidity <= quantile(volatile.acidity,0.95)))+
+  geom_boxplot()
+
+ggplot(aes(x = quality, y = residual.sugar),data = subset(wine,residual.sugar <= quantile(residual.sugar,0.99)))+
+  geom_boxplot()
+
+ggplot(aes(x = quality, y = total.sulfur.dioxide),data = subset(wine,total.sulfur.dioxide <= quantile(total.sulfur.dioxide,0.99)))+
+  geom_boxplot()
+
+ggplot(aes(x = quality, y = sulphates),data = subset(wine,sulphates <= quantile(sulphates,0.99)))+
+  geom_boxplot()
+
+```
+
+I could not find any definite pattern with boxplot for quality with residual sugar,chlorides,total sulfur dioxide, sulphates.
+
+
+
+```{r echo = FALSE}
+
+ggplot(aes(x = quality, y = chlorides),data = subset(wine,chlorides <= quantile(chlorides,0.95)))+
+  geom_boxplot()
+
+
+```
+Lower quality wine has some higher chloride content compared to wine with higher wine quality.
 
 
 
 
+
+```{r echo = FALSE}
+names(wine)
+ggplot(aes(x = alcohol, y = residual.sugar , size = quality ), data = wine)+
+  geom_point(aes(color= quality),shape=21,position = position_jitter(h=.1, w = .1))+
+  scale_y_continuous(name = "residual sugar", limits = c(0,20),breaks = seq(0,20,1))+
+  scale_x_continuous(name="alcohol", limits=c(8,14),breaks = seq(8,14,0.5))
+
+```
 
 
 
