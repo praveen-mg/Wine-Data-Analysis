@@ -17,9 +17,11 @@ white wine and its effect on quality
 ```{r echo=FALSE, warning=FALSE}
 library(ggplot2)
 library("GGally")
+library(memisc)
+library(polycor)
 ```
 ```{r echo = FALSE, warning=FALSE}
-wine <- read.csv('wineQualityWhites.csv',header = TRUE)
+wine <- read.csv('E:/NanoDegreeDataAnalyst/git-repo/Wine-Data-Analysis/wineQualityWhites.csv',header = TRUE)
 dim(wine)
 ```
 ## Summary information on different variables 
@@ -171,7 +173,7 @@ citric.acid, residual sugar, chlorides, free sulfur dioxide, total sulfur dioxid
   
 ####What are the main features of interest?
 
-The quality is the main feature of interest, I will find out how other features will influence quality. I stringly suspect residual sugar has some relation ship with the quality of the wine.Logically it makes sense for alcohol content to have some relationship with wine quality. From this univariant analysis it very difficult to esablish any relationship between quality and other features.
+The quality is the main feature of interest, I will find out how other features will influence quality. I strongly suspect residual sugar has some relation ship with the quality of the wine.Logically it makes sense for alcohol content to have some relationship with wine quality. From this univariant analysis it very difficult to esablish any relationship between quality and other features.
 
 ####What are the unusual patterns did u saw in your univariant data analysis? Did you make any adjustment to the data tidy or transform the shpae of the data? If so, why did you do this?
 
@@ -193,14 +195,46 @@ ggpairs(wine_sample)
 
 ```
 ```{r echo=FALSE}
-ggplot(aes(x = alcohol, y = quality),data = wine)+
-  geom_point()
 
-cor.test(wine$alcohol,wine$quality)
+ggplot(aes(x = alcohol, y = quality),data = wine)+
+  geom_jitter()
+ggplot(aes(x = alcohol, y = quality),data = wine)+
+  geom_point(alpha = 1/10,position = "jitter")
+
 
 ```
 
-Correlation between alcohol and quality is low at 0.4355, we could not see any relationship in scatterplot as well. Infact correlation between quality and other features are quiet low and I could not see any relationship in scatterplot as well.
+Correlation between alcohol and quality is low at 0.4355, we could not see any relationship in scatterplot as well.  I was expecting some relationship between alcohol and quality of wine.Wine quality less than 6 has most of the alcohol values less than 12. 
+
+Infact correlation between quality and other features are quiet low and I could not see any relationship in scatterplot as well.
+
+names(wine)
+
+```{r echo = FALSE}
+ggplot(aes(x = volatile.acidity, y = quality),data = wine)+
+  geom_jitter()
+ggplot(aes(x = volatile.acidity, y = quality),data = subset(wine,volatile.acidity <= 
+                                                                  quantile(wine$volatile.acidity,0.95)))+
+  geom_point(alpha = 1/10,position = "jitter")+
+   labs(x = "volatile.acidity top 95 percentile")
+
+ggplot(aes(x = chlorides, y = quality),data = wine)+
+  geom_jitter()
+ggplot(aes(x = chlorides, y = quality),data = wine)+
+  geom_point(alpha = 1/10,position = "jitter")
+
+ggplot(aes(x = total.sulfur.dioxide, y = quality),data = wine)+
+  geom_jitter()
+ggplot(aes(x = total.sulfur.dioxide, y = quality),data = subset(wine,total.sulfur.dioxide <= 
+                                                                  quantile(wine$total.sulfur.dioxide,0.95)))+
+  geom_point(alpha = 1/10,position = "jitter")+
+   labs(x = "total.sulfur.dioxide top 95 percentile")
+
+
+```
+
+It was quiet surprising to find out none of the individual features had as effect on quality of alcohol. For instance from the scatter plot between quality and volatitle acicdity, quality and chlorides, quality and total sulfur dioxide, I could not make any significat inferences.
+
 
 ```{r echo=FALSE}
 #creating Scatterplot for density,alcohol and residual sugar and density.
@@ -280,7 +314,138 @@ ggplot(aes(x = qualityLabel, y = pH),data = wine)+
 
 
 
+```{r echo = FALSE}
 
+summary(lm(formula = quality ~ volatile.acidity, data = wine))
+
+
+wine$qualityFactor <- factor(wine$quality)
+
+
+ggplot(aes(x = qualityFactor, y = alcohol),data = wine)+
+  geom_boxplot()
+
+
+
+```
+
+From box plot we can infer that for alcohol quality of 6 and above has increasing median alcohol value.
+
+
+```{r echo = FALSE}
+
+
+ggplot(aes(x = qualityFactor, y = volatile.acidity),data = wine)+
+  geom_boxplot()
+
+
+
+ggplot(aes(x = qualityFactor, y = residual.sugar),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityFactor, y = chlorides),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityFactor, y = free.sulfur.dioxide),data = wine)+
+  geom_boxplot()
+
+ggplot(aes(x = qualityFactor, y = total.sulfur.dioxide),data = wine)+
+  geom_boxplot()
+
+
+
+ggplot(aes(x = qualityFactor, y = pH),data = wine)+
+  geom_boxplot()
+
+
+```
+
+Boxplot for pH factor and quality has similar trend as alcohol.Apart from that it is difficult to establish any significant relationship between quality with cholrides or residual sugar or free sulfur dioxide or total sulfur dioxide
+
+
+```{r echo = FALSE}
+
+hetcor(wine)
+names(wine)
+ggplot(aes(x = alcohol, y = residual.sugar), data= wine)+
+  geom_point(aes(color = qualityFactor))
+names(wine)
+m1 <- lm(quality ~ alcohol, data = wine)
+
+summary(m1)
+
+m2 <- update(m1, ~ .+ I(log(volatile.acidity)))
+summary(m2)
+
+m3 <- update(m2, ~ .+ I(log(residual.sugar)))
+
+summary(m3)
+
+m4 <- update(m3, ~ .+I(total.sulfur.dioxide))
+
+summary(m4)
+
+m5 <- update(m4,~ . +I(log(pH)))
+
+
+summary(m5)
+
+m6 <- update(m5, ~. +I(log(chlorides)))
+summary(m6)
+
+m7 <- update(m6, ~. +sulphates)
+summary(m7)
+
+m8 <- update(m7, ~. + I(log(fixed.acidity)))
+
+summary(m8)
+mtable(m1,m2,m3,m4,m5,m6,m7,m8)
+
+
+#density, sulphate
+names(wine)
+alcohol <- wine[,12]
+summary(alcohol)
+
+
+```
+
+
+```{r echo = FALSE}
+names(wine)
+m1 <- lm(quality ~ alcohol, data = wine)
+
+summary(m1)
+
+m2 <- update(m1, ~ .+ volatile.acidity)
+summary(m2)
+
+m3 <- update(m2, ~ .+ fixed.acidity)
+
+summary(m3)
+
+m4 <- update(m2, ~ .+ residual.sugar)
+
+summary(m4)
+
+m5 <- update(m4, ~.+ chlorides)
+
+summary(m5)
+
+m5 <- update(m4, ~.+ free.sulfur.dioxide)
+summary(m5)
+
+m6 <- update(m5, ~.+ total.sulfur.dioxide)
+summary(m6)
+
+m6 <- update(m5, ~.+ pH )
+summary(m6)
+
+m7 <- update(m6, ~.+ sulphates)
+summary(m7)
+
+
+```
 
 
 
