@@ -213,7 +213,7 @@ ggplot(aes(x = alcohol, y = quality),data = wine)+
 cor.test(wine$alcohol,wine$quality)
 
 ```
-From the scatterlot between alcohol and quality we can see alcohol quality at 5,6,7 have range of alcohol content from 7 percent to 13 percent. The lower quality wine of 5 and below have alcohol content predominently in the range of 7 and 11. 
+From the scatter plot between alcohol and quality we can see alcohol quality at 5,6,7 have range of alcohol content from 7 percent to 13 percent. The lower quality wine of 5 and below have alcohol content predominently in the range of 7 and 11. 
 
 
 
@@ -240,8 +240,12 @@ Density and alcohol seems to have negative correlation with pearson R value of -
 ggplot(aes(x = residual.sugar, y = density),data = wine)+
   geom_point()+
   xlim(0,quantile(wine$residual.sugar,.95))+
+  scale_x_log10()+
   geom_smooth(method = 'lm',color = 'red')
 
+
+
+  
 cor.test(wine$residual.sugar,wine$density)
 
 
@@ -337,74 +341,11 @@ Differnt wine quality of wine has similar distribution of sulphates.
 
 
 
-
-```{r echo=FALSE, warning=FALSE}
-#grouping wine into quality of low, medium and high based on quality value
-
-wine$qualityLabel <- ifelse(wine$quality < 5, 'low',ifelse(wine$quality < 7,'medium','high'))
-
-wine$qualityLabel <- ifelse(wine$quality < 6, 'low','high')
-table(wine$quality)
-table(wine$qualityLabel)
-
-```
-It is very difficult to establish any relationship between quality and other features in the dataset. This dataset doesnot have any ordered feature, I created one using quality. The quality is divied into three ordered variable namely low, medium and high. The wine quality score less than 4 are categorized as low, score 5 and 6 are categorized as medium and scores above 6 are categorized as high. 
-
-Based on this categorical quality data we do the boxplot analysis on different variables in this dataset.
-
-#### Boxplot Analysis
-```{r echo=FALSE, warning=FALSE}
-
-is.factor(wine$qualityLabel)
-
-wine$qualityLabel <- factor(wine$qualityLabel)
-
-
-ggplot(aes(x = qualityLabel, y = alcohol),data = wine)+
-  geom_boxplot()
-
-ggplot(aes(x = qualityLabel, y = fixed.acidity),data = wine)+
-  geom_boxplot()
-
-ggplot(aes(x = qualityLabel, y = volatile.acidity),data = wine)+
-  geom_boxplot()
-
-ggplot(aes(x = qualityLabel, y = citric.acid),data = wine)+
-  geom_boxplot()
-
-ggplot(aes(x = qualityLabel, y = residual.sugar),data = wine)+
-  geom_boxplot()
-
-ggplot(aes(x = qualityLabel, y = chlorides),data = wine)+
-  geom_boxplot()
-
-ggplot(aes(x = qualityLabel, y = free.sulfur.dioxide),data = wine)+
-  geom_boxplot()
-
-ggplot(aes(x = qualityLabel, y = total.sulfur.dioxide),data = wine)+
-  geom_boxplot()
-
-ggplot(aes(x = qualityLabel, y = density),data = wine)+
-  geom_boxplot()
-
-ggplot(aes(x = qualityLabel, y = pH),data = wine)+
-  geom_boxplot()
-
-wine$qualityordered <- factor(wine$quality)
-
-ggplot(aes(x= qualityordered, y = alcohol), data = wine)+
-geom_boxplot()
-
-ggplot(aes(x = qualityordered, y = pH),data = wine)+
-  geom_boxplot()
-
-```
-
 ```{r echo = FALSE}
 
-wine$quality <- factor(wine$quality)
+wine$qualityfactor <- factor(wine$quality)
 
-table(wine$quality)
+table(wine$qualityfactor)
 
 ```
 
@@ -414,10 +355,10 @@ To do box plot analysis quality is converted to factor variable.
 
 
 
-ggplot(aes(x = quality, y = alcohol),data = wine)+
+ggplot(aes(x = qualityfactor, y = alcohol),data = wine)+
   geom_boxplot()
 
-ggplot(aes(x = quality, y = density),data = wine)+
+ggplot(aes(x = qualityfactor, y = density),data = wine)+
   geom_boxplot()
 
 
@@ -430,19 +371,19 @@ The wine quality of 6 and above have higher median alcohol value and median alco
 
 # residual.sugar,chlorides, #total.sulfur.dioxide, density and sulphates
 
-ggplot(aes(x = quality, y = fixed.acidity),data = wine)+
+ggplot(aes(x = qualityfactor, y = fixed.acidity),data = wine)+
   geom_boxplot()
 
-ggplot(aes(x = quality, y = volatile.acidity),data = subset(wine,volatile.acidity <= quantile(volatile.acidity,0.95)))+
+ggplot(aes(x = qualityfactor, y = volatile.acidity),data = subset(wine,volatile.acidity <= quantile(volatile.acidity,0.95)))+
   geom_boxplot()
 
-ggplot(aes(x = quality, y = residual.sugar),data = subset(wine,residual.sugar <= quantile(residual.sugar,0.99)))+
+ggplot(aes(x = qualityfactor, y = residual.sugar),data = subset(wine,residual.sugar <= quantile(residual.sugar,0.99)))+
   geom_boxplot()
 
-ggplot(aes(x = quality, y = total.sulfur.dioxide),data = subset(wine,total.sulfur.dioxide <= quantile(total.sulfur.dioxide,0.99)))+
+ggplot(aes(x = qualityfactor, y = total.sulfur.dioxide),data = subset(wine,total.sulfur.dioxide <= quantile(total.sulfur.dioxide,0.99)))+
   geom_boxplot()
 
-ggplot(aes(x = quality, y = sulphates),data = subset(wine,sulphates <= quantile(sulphates,0.99)))+
+ggplot(aes(x = qualityfactor, y = sulphates),data = subset(wine,sulphates <= quantile(sulphates,0.99)))+
   geom_boxplot()
 
 ```
@@ -453,12 +394,37 @@ I could not find any definite pattern with boxplot for quality with residual sug
 
 ```{r echo = FALSE}
 
-ggplot(aes(x = quality, y = chlorides),data = subset(wine,chlorides <= quantile(chlorides,0.95)))+
+ggplot(aes(x = qualityfactor, y = chlorides),data = subset(wine,chlorides <= quantile(chlorides,0.95)))+
   geom_boxplot()
 
 
 ```
 Lower quality wine has some higher chloride content compared to wine with higher wine quality.
+
+## Bivariant Data Analysis 
+
+#### What are the relationship between features that where observed in bivariant analysis?
+
+
+We can find relationship between quality and alcohol with correlation coefficient of  0.4356. The higher quality of wine has higher the alcohol content. The higher wine quality of 7, 8 and 9 have higher median alcohol content compared to lower wine quality 
+
+The next feature that influence the wine quality is density, it has correlation value of  -0.3071, the density is physical property which is affected by other chemical feature that is present in the wine, in our case it is affected by alcohol and residual sugar. I strongly suspect density does not affect wine quality in a big way as the density itself affected by presence of other chemicals.
+
+The chloride has negative correlation with wine quality with correlation coefficient of -0.2099. The higher wine quality of 7, 8 and 9 have lower median chloride content compared to lower wine quality.
+
+The other features that seems to have effect on wine quality are fixed acidity, volatile acidity, residual sugar, total sulfur dioxide and sulphates. Further analysis is needed to determine the relationship between these feature and wine quality.
+
+
+#### Did you find any relationship between other features other than main feature(s) of interest?
+
+The density strongly correlates with residual sugar. The correlation coefficient between density and residual sugar is 0.839.
+
+There is strong negative correlation between alcohol and density, higher the percentage of alcohol lower is the density.
+
+#### What are the features that have strong relationship with feature of interest?
+
+I found strong positve correlation between alcohol and quality. The density had strong negative correlation. The chloride is another feature that had  negative correlation.
+
 
 
 
